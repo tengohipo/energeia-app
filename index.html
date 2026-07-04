@@ -1,890 +1,261 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0d0d0f" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Energeia" />
-  <link rel="manifest" href="./manifest.json" />
-  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-  <title>Energeia — Energy Drink Tracker</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg: #0d0d0f;
-  --surface: #16161a;
-  --surface2: #1e1e24;
-  --border: #2a2a33;
-  --accent: #e8c547;
-  --accent-dim: rgba(232, 197, 71, 0.12);
-  --text: #f0f0f0;
-  --text-dim: #888;
-  --text-muted: #555;
-  --red: #e85c5c;
-  --green: #5ce88a;
-  --radius: 12px;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  overflow: hidden;
-}
-
-#app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-}
-
-#header {
-  padding: 16px 20px 12px;
-  padding-top: calc(16px + env(safe-area-inset-top, 0px));
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-  flex-shrink: 0;
-}
-
-#header h1 {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  color: var(--accent);
-  text-transform: uppercase;
-}
-
-#view {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.view-page {
-  display: none;
-  padding: 16px 20px;
-  padding-bottom: calc(80px + var(--safe-bottom));
-  min-height: 100%;
-}
-
-.view-page.active { display: block; }
-
-#tabs {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  padding-bottom: var(--safe-bottom);
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  display: flex;
-  z-index: 100;
-}
-
-.tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 10px 0;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: color 0.15s;
-}
-
-.tab.active { color: var(--accent); }
-.tab svg { width: 22px; height: 22px; }
-
-.stats-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 10px;
-  text-align: center;
-}
-
-.stat-card .val { font-size: 24px; font-weight: 800; color: var(--accent); line-height: 1; }
-.stat-card .lbl { font-size: 11px; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-
-.search-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
-
-.search-input {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-}
-
-.search-input::placeholder { color: var(--text-muted); }
-.search-input:focus { border-color: var(--accent); }
-
-.sort-btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  color: var(--text-dim);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.drink-list { display: flex; flex-direction: column; gap: 10px; }
-
-.drink-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.drink-card:active { border-color: var(--accent); }
-
-.drink-thumb {
-  width: 48px; height: 48px;
-  border-radius: 8px;
-  background: var(--surface2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; flex-shrink: 0; overflow: hidden;
-}
-
-.drink-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-
-.drink-info { flex: 1; min-width: 0; }
-.drink-brand { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.drink-flavor { font-size: 13px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.drink-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-.drink-date { font-size: 11px; color: var(--text-muted); }
-.drink-rating-badge { background: var(--accent-dim); color: var(--accent); font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
-.buy-badge { font-size: 11px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
-.buy-yes { background: rgba(92,232,138,0.12); color: var(--green); }
-.buy-no  { background: rgba(232,92,92,0.12);  color: var(--red); }
-
-#fab {
-  position: fixed;
-  bottom: calc(64px + var(--safe-bottom) + 16px);
-  right: 20px;
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #000;
-  font-size: 28px;
-  border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 20px rgba(232,197,71,0.4);
-  z-index: 99;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-
-#fab:active { transform: scale(0.93); }
-
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 60px 20px; text-align: center; gap: 12px;
-}
-
-.empty-state .icon { font-size: 48px; }
-.empty-state .title { font-size: 18px; font-weight: 700; }
-.empty-state .sub { font-size: 14px; color: var(--text-dim); }
-
-#panel {
-  position: fixed; inset: 0; z-index: 200;
-  display: none; flex-direction: column; background: var(--bg);
-}
-
-#panel.open { display: flex; }
-
-#panel-header {
-  padding: 16px 20px 12px;
-  padding-top: calc(16px + env(safe-area-inset-top, 0px));
-  display: flex; align-items: center; gap: 12px;
-  border-bottom: 1px solid var(--border); flex-shrink: 0;
-}
-
-#panel-back {
-  background: none; border: none; color: var(--accent);
-  font-size: 16px; cursor: pointer; padding: 4px;
-  display: flex; align-items: center; gap: 4px; font-weight: 600;
-}
-
-#panel-title { font-size: 17px; font-weight: 700; flex: 1; }
-
-#panel-action {
-  background: none; border: none; color: var(--accent);
-  font-size: 15px; font-weight: 700; cursor: pointer; padding: 4px;
-}
-
-#panel-body {
-  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 20px; padding-bottom: calc(40px + var(--safe-bottom));
-}
-
-.form-group { margin-bottom: 20px; }
-
-.form-label {
-  display: block; font-size: 12px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--text-dim); margin-bottom: 8px;
-}
-
-.form-input {
-  width: 100%; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 12px 14px; color: var(--text);
-  font-size: 16px; outline: none; appearance: none;
-}
-
-.form-input:focus { border-color: var(--accent); }
-textarea.form-input { resize: none; height: 90px; font-family: inherit; }
-
-.star-picker { display: flex; gap: 8px; }
-
-.star-picker .star {
-  font-size: 32px; cursor: pointer; color: var(--border);
-  transition: color 0.1s, transform 0.1s;
-  -webkit-tap-highlight-color: transparent; user-select: none;
-}
-
-.star-picker .star.on { color: var(--accent); }
-.star-picker .star:active { transform: scale(1.2); }
-
-.toggle-row {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 14px 16px;
-}
-
-.toggle-label { font-size: 15px; font-weight: 500; }
-.toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
-
-.toggle input {
-  position: absolute; opacity: 0; width: 100%; height: 100%;
-  cursor: pointer; z-index: 1; margin: 0;
-}
-
-.toggle-track {
-  position: absolute; inset: 0;
-  background: var(--border); border-radius: 13px; transition: background 0.2s;
-}
-
-.toggle input:checked + .toggle-track { background: var(--accent); }
-
-.toggle-thumb {
-  position: absolute; top: 3px; left: 3px;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: white; transition: transform 0.2s; pointer-events: none;
-}
-
-.toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
-
-.seg-control {
-  display: flex; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 8px; padding: 3px; gap: 3px;
-}
-
-.seg-btn {
-  flex: 1; padding: 8px; border: none; border-radius: 6px;
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  background: none; color: var(--text-dim); transition: all 0.15s;
-}
-
-.seg-btn.active { background: var(--accent); color: #000; }
-
-.photo-upload {
-  width: 100%; height: 120px;
-  background: var(--surface); border: 2px dashed var(--border);
-  border-radius: 8px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 8px;
-  cursor: pointer; color: var(--text-dim); font-size: 13px;
-  overflow: hidden; position: relative;
-}
-
-.photo-upload img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.photo-upload-icon { font-size: 28px; }
-#photo-input { display: none; }
-
-.detail-photo { width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius); margin-bottom: 20px; }
-.detail-brand { font-size: 26px; font-weight: 800; line-height: 1.2; }
-.detail-flavor { font-size: 17px; color: var(--text-dim); margin-top: 2px; }
-.detail-stars { display: flex; gap: 4px; margin-top: 12px; }
-.detail-stars .star { font-size: 28px; }
-.detail-stars .star.on { color: var(--accent); }
-.detail-stars .star.off { color: var(--border); }
-
-.detail-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 0; border-bottom: 1px solid var(--border);
-}
-
-.detail-row:last-of-type { border-bottom: none; }
-.detail-row-lbl { font-size: 13px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-.detail-row-val { font-size: 15px; font-weight: 600; text-align: right; max-width: 60%; }
-
-.detail-notes { margin-top: 16px; background: var(--surface); border-radius: var(--radius); padding: 14px 16px; }
-.detail-notes-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
-.detail-actions { display: flex; gap: 10px; margin-top: 24px; }
-
-.btn {
-  flex: 1; padding: 14px; border-radius: var(--radius); border: none;
-  font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
-}
-
-.btn:active { opacity: 0.75; }
-.btn-primary { background: var(--accent); color: #000; }
-.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-.btn-danger { background: rgba(232,92,92,0.15); color: var(--red); }
-
-.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
-
-.stats-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px;
-}
-
-.stats-card .val { font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1; }
-.stats-card .lbl { font-size: 12px; color: var(--text-dim); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-.stats-card.full { grid-column: span 2; }
-
-.section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 12px; }
-.brand-bar-list { display: flex; flex-direction: column; gap: 10px; }
-.brand-bar-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
-.brand-bar-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-.brand-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
-
-.want-card-actions { display: flex; gap: 8px; margin-top: 12px; }
-
-/* ---- SCAN BUTTON ---- */
-.scan-cta {
-  display: flex; gap: 10px; align-items: center;
-  background: var(--accent-dim); border: 1px solid rgba(232,197,71,0.3);
-  border-radius: var(--radius); padding: 14px 16px;
-  margin-bottom: 20px; cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.scan-cta:active { opacity: 0.8; }
-.scan-cta-icon { font-size: 28px; flex-shrink: 0; }
-.scan-cta-text .scan-cta-title { font-size: 15px; font-weight: 700; color: var(--accent); }
-.scan-cta-text .scan-cta-sub { font-size: 12px; color: var(--text-dim); margin-top: 1px; }
-
-/* ---- SCANNER MODAL ---- */
-#scanner-modal {
-  position: fixed; inset: 0; z-index: 600;
-  background: #000;
-  display: none; flex-direction: column;
-}
-
-#scanner-modal.open { display: flex; }
-
-#scanner-video {
-  width: 100%; flex: 1;
-  object-fit: cover;
-}
-
-#scanner-overlay {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  pointer-events: none;
-}
-
-.scanner-box {
-  position: relative;
-  width: 260px; height: 170px;
-}
-
-.scanner-frame {
-  width: 100%; height: 100%;
-  border: 2px solid var(--accent);
-  border-radius: 12px;
-  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
-}
-
-.scanner-line {
-  position: absolute;
-  left: 6px; right: 6px; height: 2px;
-  background: var(--accent);
-  border-radius: 1px;
-  top: 15%;
-  animation: scanline 2s ease-in-out infinite;
-  box-shadow: 0 0 8px var(--accent);
-}
-
-@keyframes scanline {
-  0%, 100% { top: 10%; }
-  50% { top: 82%; }
-}
-
-.scanner-hint {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  margin-top: 24px;
-  background: rgba(0,0,0,0.6);
-  padding: 8px 18px;
-  border-radius: 20px;
-  letter-spacing: 0.02em;
-}
-
-#scanner-cancel {
-  position: absolute;
-  bottom: calc(48px + env(safe-area-inset-bottom, 0px));
-  left: 50%; transform: translateX(-50%);
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(8px);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.25);
-  padding: 14px 40px;
-  border-radius: 30px;
-  font-size: 16px; font-weight: 700;
-  cursor: pointer;
-  pointer-events: all;
-}
-
-#scanner-status {
-  position: absolute;
-  top: calc(40px + env(safe-area-inset-top, 0px));
-  left: 50%; transform: translateX(-50%);
-  background: rgba(0,0,0,0.65);
-  color: var(--accent);
-  font-size: 13px; font-weight: 700;
-  padding: 7px 16px; border-radius: 20px;
-  white-space: nowrap;
-  letter-spacing: 0.05em;
-}
-
-/* ---- TOAST ---- */
-#toast {
-  position: fixed;
-  bottom: calc(72px + var(--safe-bottom) + 16px);
-  left: 50%; transform: translateX(-50%) translateY(20px);
-  background: var(--surface2); color: var(--text);
-  border: 1px solid var(--border); padding: 10px 18px;
-  border-radius: 20px; font-size: 14px; font-weight: 600;
-  opacity: 0; transition: opacity 0.2s, transform 0.2s;
-  z-index: 300; white-space: nowrap;
-}
-
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ---- CONFIRM ---- */
-#confirm {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-  display: none; align-items: flex-end; justify-content: center;
-  z-index: 400; padding: 20px;
-  padding-bottom: calc(20px + var(--safe-bottom));
-}
-
-#confirm.open { display: flex; }
-
-.confirm-box {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 16px; width: 100%; max-width: 400px; padding: 24px 20px 20px;
-}
-
-.confirm-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-.confirm-sub { font-size: 14px; color: var(--text-dim); margin-bottom: 20px; }
-.confirm-btns { display: flex; gap: 10px; }
-  </style>
-</head>
-<body>
-<div id="app">
-
-  <div id="header">
-    <h1>Energeia</h1>
-  </div>
-
-  <div id="view">
-
-<!-- Tried -->
-<div id="page-tried" class="view-page active">
-  <div class="stats-strip" id="tried-strip"></div>
-  <div class="search-row">
-    <input class="search-input" id="search-tried" placeholder="Search brand or flavor..." oninput="renderTried()" />
-    <button class="sort-btn" id="sort-btn" onclick="cycleSort()">Newest</button>
-  </div>
-  <div class="drink-list" id="tried-list"></div>
-</div>
-
-<!-- Want to Try -->
-<div id="page-want" class="view-page">
-  <div class="search-row">
-    <input class="search-input" id="search-want" placeholder="Search brand or flavor..." oninput="renderWant()" />
-  </div>
-  <div class="drink-list" id="want-list"></div>
-</div>
-
-<!-- Stats -->
-<div id="page-stats" class="view-page">
-  <div class="stats-grid" id="stats-grid"></div>
-  <div class="section-title">By Brand</div>
-  <div class="brand-bar-list" id="brand-bars"></div>
-</div>
-  </div>
-
-  <div id="tabs">
-    <button class="tab active" onclick="switchTab('tried', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-      </svg>
-      Tried
-    </button>
-    <button class="tab" onclick="switchTab('want', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-      </svg>
-      Want to Try
-    </button>
-    <button class="tab" onclick="switchTab('stats', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-      </svg>
-      Stats
-    </button>
-  </div>
-
-<button id="fab" onclick="openForm(null)">+</button>
-</div>
-
-<!-- Panel -->
-<div id="panel">
-  <div id="panel-header">
-    <button id="panel-back" onclick="closePanel()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M19 12H5M12 5l-7 7 7 7"/>
-      </svg>
-      Back
-    </button>
-    <div id="panel-title">Add Drink</div>
-    <button id="panel-action" onclick="saveForm()">Save</button>
-  </div>
-  <div id="panel-body"></div>
-</div>
-
-<!-- Scanner Modal -->
-<div id="scanner-modal">
-  <video id="scanner-video" autoplay playsinline muted></video>
-  <div id="scanner-overlay">
-    <div id="scanner-status">SCANNING...</div>
-    <div class="scanner-box">
-      <div class="scanner-frame"></div>
-      <div class="scanner-line"></div>
-    </div>
-    <div class="scanner-hint">Point at the barcode on the can</div>
-  </div>
-  <button id="scanner-cancel" onclick="stopScanner()">Cancel</button>
-</div>
-
-<input type="file" id="barcode-file-input" accept="image/*" capture="environment" style="display:none" onchange="handleBarcodeFile(this)" />
-
-<div id="toast"></div>
-
-<div id="confirm">
-  <div class="confirm-box">
-    <div class="confirm-title" id="confirm-title">Delete Drink?</div>
-    <div class="confirm-sub" id="confirm-sub">This cannot be undone.</div>
-    <div class="confirm-btns">
-      <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
-      <button class="btn btn-danger" id="confirm-ok">Delete</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// DATA
-const DB_KEY = 'energeia_drinks';
-let drinks = [];
-let currentSort = 'newest';
-let editingId = null;
+// DATA 
+const DB_KEY = 'energeia_drinks'; 
+let drinks = []; 
+let currentSort = 'newest'; 
+let editingId = null; 
 let activeTab = 'tried';
 
-function loadData() {
-  try { drinks = JSON.parse(localStorage.getItem(DB_KEY)) || []; }
-  catch(e) { drinks = []; }
+function loadData() { 
+try { drinks = JSON.parse(localStorage.getItem(DB_KEY)) || []; } 
+catch(e) { drinks = []; } 
 }
 
-function saveData() {
-  localStorage.setItem(DB_KEY, JSON.stringify(drinks));
+function saveData() { 
+localStorage.setItem(DB_KEY, JSON.stringify(drinks)); 
 }
 
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function uid() { 
+return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); 
 }
 
-// NAV
-function switchTab(tab, btn) {
-  activeTab = tab;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + tab).classList.add('active');
-  document.getElementById('view').scrollTop = 0;
-  if (tab = 'tried') renderTried();
-  if (tab = 'want') renderWant();
-  if (tab = 'stats') renderStats();
+// NAV 
+function switchTab(tab, btn) { 
+activeTab = tab; 
+document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); 
+btn.classList.add('active'); 
+document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active')); 
+document.getElementById('page-' + tab).classList.add('active'); 
+document.getElementById('view').scrollTop = 0; 
+if (tab = 'tried') renderTried(); 
+if (tab = 'want') renderWant(); 
+if (tab = 'stats') renderStats(); 
 }
 
-function closePanel() {
-  document.getElementById('panel').classList.remove('open');
-  document.getElementById('fab').style.display = '';
-  editingId = null;
+function closePanel() { 
+document.getElementById('panel').classList.remove('open'); 
+document.getElementById('fab').style.display = ''; 
+editingId = null; 
 }
 
-// SORT
+// SORT 
 const sortLabels = { newest: 'Newest', rating: 'Top Rated', brand: 'Brand A-Z' };
 
-function cycleSort() {
-  const order = ['newest', 'rating', 'brand'];
-  currentSort = order[(order.indexOf(currentSort) + 1) % order.length];
-  document.getElementById('sort-btn').textContent = sortLabels[currentSort];
-  renderTried();
+function cycleSort() { 
+const order = ['newest', 'rating', 'brand']; 
+currentSort = order[(order.indexOf(currentSort) + 1) % order.length]; 
+document.getElementById('sort-btn').textContent = sortLabels[currentSort]; 
+renderTried(); 
 }
 
-function filterAndSort(list, query, sort) {
-  let result = list.filter(d =>
-    (d.brand || '').toLowerCase().includes(query.toLowerCase()) ||
-    (d.flavor || '').toLowerCase().includes(query.toLowerCase())
-  );
-  if (sort = 'newest') result.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-  if (sort = 'rating') result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-  if (sort = 'brand')  result.sort((a, b) => (a.brand || '').localeCompare(b.brand || ''));
-  return result;
+function filterAndSort(list, query, sort) { 
+let result = list.filter(d => 
+(d.brand || '').toLowerCase().includes(query.toLowerCase()) || 
+(d.flavor || '').toLowerCase().includes(query.toLowerCase()) 
+); 
+if (sort = 'newest') result.sort((a, b) => (b.date || '').localeCompare(a.date || '')); 
+if (sort = 'rating') result.sort((a, b) => (b.rating || 0) - (a.rating || 0)); 
+if (sort = 'brand')  result.sort((a, b) => (a.brand || '').localeCompare(b.brand || '')); 
+return result; 
 }
 
-// RENDER TRIED
-function renderTried() {
-  const tried = drinks.filter(d => d.status = 'tried');
-  const avg = tried.length
-    ? (tried.reduce((s, d) => s + (d.rating || 0), 0) / tried.length).toFixed(1)
-    : '—';
-  const top = tried.length
-    ? tried.reduce((a, b) => (b.rating || 0) > (a.rating || 0) ? b : a, tried[0])
-    : null;
+// RENDER TRIED 
+function renderTried() { 
+const tried = drinks.filter(d => d.status = 'tried'); 
+const avg = tried.length 
+? (tried.reduce((s, d) => s + (d.rating || 0), 0) / tried.length).toFixed(1) 
+: '—'; 
+const top = tried.length 
+? tried.reduce((a, b) => (b.rating || 0) > (a.rating || 0) ? b : a, tried[0]) 
+: null;
 
-  document.getElementById('tried-strip').innerHTML = `
-    <div class="stat-card"><div class="val">${tried.length}</div><div class="lbl">Tried</div></div>
-    <div class="stat-card"><div class="val">${avg}</div><div class="lbl">Avg Rating</div></div>
-    <div class="stat-card"><div class="val">${top ? top.rating : '—'}</div><div class="lbl">Best Score</div></div>
-  `;
+document.getElementById('tried-strip').innerHTML = <div class="stat-card"><div class="val">${tried.length}</div><div class="lbl">Tried</div></div> <div class="stat-card"><div class="val">${avg}</div><div class="lbl">Avg Rating</div></div> <div class="stat-card"><div class="val">${top ? top.rating : '—'}</div><div class="lbl">Best Score</div></div>;
 
-  const query = document.getElementById('search-tried').value;
-  const items = filterAndSort(tried, query, currentSort);
-  const list = document.getElementById('tried-list');
 
-  if (!items.length) {
-    list.innerHTML = tried.length = 0
-      ? `<div class="empty-state"><div class="icon">🥤</div><div class="title">Nothing logged yet</div><div class="sub">Tap + to add your first drink</div></div>`
-      : `<div class="empty-state"><div class="icon">🔍</div><div class="title">No results</div><div class="sub">Try a different search</div></div>`;
-    return;
-  }
-  list.innerHTML = items.map(d => drinkCard(d)).join('');
+
+
+
+const query = document.getElementById('search-tried').value; 
+const items = filterAndSort(tried, query, currentSort); 
+const list = document.getElementById('tried-list');
+
+if (!items.length) { 
+list.innerHTML = tried.length = 0 
+? <div class="empty-state"><div class="icon">🥤</div><div class="title">Nothing logged yet</div><div class="sub">Tap + to add your first drink</div></div> 
+: <div class="empty-state"><div class="icon">🔍</div><div class="title">No results</div><div class="sub">Try a different search</div></div>; 
+return; 
+} 
+list.innerHTML = items.map(d => drinkCard(d)).join(''); 
 }
 
-// RENDER WANT
-function renderWant() {
-  const want = drinks.filter(d => d.status = 'want');
-  const query = document.getElementById('search-want').value;
-  const items = filterAndSort(want, query, 'newest');
-  const list = document.getElementById('want-list');
+// RENDER WANT 
+function renderWant() { 
+const want = drinks.filter(d => d.status = 'want'); 
+const query = document.getElementById('search-want').value; 
+const items = filterAndSort(want, query, 'newest'); 
+const list = document.getElementById('want-list');
 
-  if (!items.length) {
-    list.innerHTML = want.length = 0
-      ? `<div class="empty-state"><div class="icon">📋</div><div class="title">Nothing on the list yet</div><div class="sub">Tap + to add drinks to try</div></div>`
-      : `<div class="empty-state"><div class="icon">🔍</div><div class="title">No results</div><div class="sub">Try a different search</div></div>`;
-    return;
-  }
-  list.innerHTML = items.map(d => wantCard(d)).join('');
+if (!items.length) { 
+list.innerHTML = want.length = 0 
+? <div class="empty-state"><div class="icon">📋</div><div class="title">Nothing on the list yet</div><div class="sub">Tap + to add drinks to try</div></div> 
+: <div class="empty-state"><div class="icon">🔍</div><div class="title">No results</div><div class="sub">Try a different search</div></div>; 
+return; 
+} 
+list.innerHTML = items.map(d => wantCard(d)).join(''); 
 }
 
-// CARD HTML
-function drinkCard(d) {
-  const thumb = d.photo
-    ? `<div class="drink-thumb"><img src="${d.photo}" /></div>`
-    : `<div class="drink-thumb">🥤</div>`;
-  const buyBadge = d.buyAgain
-    ? `<span class="buy-badge buy-yes">Buy Again</span>`
-    : `<span class="buy-badge buy-no">Skip</span>`;
-  return `
-    <div class="drink-card" onclick="openDetail('${d.id}')">
-      ${thumb}
-      <div class="drink-info">
-        <div class="drink-brand">${esc(d.brand)}</div>
-        <div class="drink-flavor">${esc(d.flavor) || 'No flavor listed'}</div>
-        <div class="drink-meta">
-          <span class="drink-rating-badge">★ ${d.rating || '—'}</span>
-          ${buyBadge}
-          <span class="drink-date">${fmtDate(d.date)}</span>
-        </div>
-      </div>
-    </div>
-  `;
+// CARD HTML 
+function drinkCard(d) { 
+const thumb = d.photo 
+? <div class="drink-thumb"><img src="${d.photo}" /></div> 
+: <div class="drink-thumb">🥤</div>; 
+const buyBadge = d.buyAgain 
+? <span class="buy-badge buy-yes">Buy Again</span> 
+: <span class="buy-badge buy-no">Skip</span>; 
+return <div class="drink-card" onclick="openDetail('${d.id}')"> ${thumb} <div class="drink-info"> <div class="drink-brand">${esc(d.brand)}</div> <div class="drink-flavor">${esc(d.flavor) || 'No flavor listed'}</div> <div class="drink-meta"> <span class="drink-rating-badge">★ ${d.rating || '—'}</span> ${buyBadge} <span class="drink-date">${fmtDate(d.date)}</span> </div> </div> </div>; 
 }
 
-function wantCard(d) {
-  const thumb = d.photo
-    ? `<div class="drink-thumb"><img src="${d.photo}" /></div>`
-    : `<div class="drink-thumb">🥤</div>`;
-  return `
-    <div class="drink-card" style="flex-direction:column; align-items:stretch; cursor:default;">
-      <div style="display:flex; align-items:center; gap:14px;">
-        ${thumb}
-        <div class="drink-info">
-          <div class="drink-brand">${esc(d.brand)}</div>
-          <div class="drink-flavor">${esc(d.flavor) || 'No flavor listed'}</div>
-          <div class="drink-date" style="margin-top:4px;">${fmtDate(d.date)}</div>
-        </div>
-      </div>
-      <div class="want-card-actions">
-        <button class="btn btn-primary" style="font-size:13px;padding:10px;" onclick="markTried('${d.id}')">Mark as Tried</button>
-        <button class="btn btn-secondary" style="font-size:13px;padding:10px;" onclick="openForm('${d.id}')">Edit</button>
-        <button class="btn btn-danger" style="font-size:13px;padding:10px;flex:0;min-width:44px;" onclick="confirmDelete('${d.id}')">✕</button>
-      </div>
-    </div>
-  `;
+
+
+
+
+
+
+
+
+
+
+
+
+
+function wantCard(d) { 
+const thumb = d.photo 
+? <div class="drink-thumb"><img src="${d.photo}" /></div> 
+: <div class="drink-thumb">🥤</div>; 
+return <div class="drink-card" style="flex-direction:column; align-items:stretch; cursor:default;"> <div style="display:flex; align-items:center; gap:14px;"> ${thumb} <div class="drink-info"> <div class="drink-brand">${esc(d.brand)}</div> <div class="drink-flavor">${esc(d.flavor) || 'No flavor listed'}</div> <div class="drink-date" style="margin-top:4px;">${fmtDate(d.date)}</div> </div> </div> <div class="want-card-actions"> <button class="btn btn-primary" style="font-size:13px;padding:10px;" onclick="markTried('${d.id}')">Mark as Tried</button> <button class="btn btn-secondary" style="font-size:13px;padding:10px;" onclick="openForm('${d.id}')">Edit</button> <button class="btn btn-danger" style="font-size:13px;padding:10px;flex:0;min-width:44px;" onclick="confirmDelete('${d.id}')">✕</button> </div> </div>; 
 }
 
-// DETAIL
-function openDetail(id) {
-  const d = drinks.find(x => x.id = id);
-  if (!d) return;
 
-  document.getElementById('panel-title').textContent = d.brand;
-  document.getElementById('panel-action').textContent = 'Edit';
-  document.getElementById('panel-action').onclick = () => { closePanel(); openForm(id); };
 
-  const stars = [1,2,3,4,5].map(i =>
-    `<span class="star ${i <= (d.rating||0) ? 'on' : 'off'}">★</span>`
-  ).join('');
 
-  const photo = d.photo ? `<img class="detail-photo" src="${d.photo}" />` : '';
 
-  document.getElementById('panel-body').innerHTML = `
-    ${photo}
-    <div style="margin-bottom:20px;">
-      <div class="detail-brand">${esc(d.brand)}</div>
-      <div class="detail-flavor">${esc(d.flavor) || ''}</div>
-      <div class="detail-stars">${stars}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-row-lbl">Date Tried</div>
-      <div class="detail-row-val">${fmtDate(d.date)}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-row-lbl">Would Buy Again</div>
-      <div class="detail-row-val">${d.buyAgain ? '✅ Yes' : '❌ No'}</div>
-    </div>
-    ${d.notes ? `
-    <div class="detail-notes">
-      <div class="detail-notes-lbl">Notes</div>
-      <div>${esc(d.notes)}</div>
-    </div>` : ''}
-    <div class="detail-actions">
-      <button class="btn btn-secondary" onclick="closePanel(); openForm('${id}')">Edit</button>
-      <button class="btn btn-danger" onclick="confirmDelete('${id}')">Delete</button>
-    </div>
-  `;
 
-  document.getElementById('fab').style.display = 'none';
-  document.getElementById('panel').classList.add('open');
+
+
+
+
+
+
+
+
+
+
+
+// DETAIL 
+function openDetail(id) { 
+const d = drinks.find(x => x.id = id); 
+if (!d) return;
+
+document.getElementById('panel-title').textContent = d.brand; 
+document.getElementById('panel-action').textContent = 'Edit'; 
+document.getElementById('panel-action').onclick = () => { closePanel(); openForm(id); };
+
+const stars = [1,2,3,4,5].map(i => 
+<span class="star ${i <= (d.rating||0) ? 'on' : 'off'}">★</span> 
+).join('');
+
+const photo = d.photo ? <img class="detail-photo" src="${d.photo}" /> : '';
+
+document.getElementById('panel-body').innerHTML = ${photo} <div style="margin-bottom:20px;"> <div class="detail-brand">${esc(d.brand)}</div> <div class="detail-flavor">${esc(d.flavor) || ''}</div> <div class="detail-stars">${stars}</div> </div> <div class="detail-row"> <div class="detail-row-lbl">Date Tried</div> <div class="detail-row-val">${fmtDate(d.date)}</div> </div> <div class="detail-row"> <div class="detail-row-lbl">Would Buy Again</div> <div class="detail-row-val">${d.buyAgain ? '✅ Yes' : '❌ No'}</div> </div> ${d.notes ? 
+<div class="detail-notes"> 
+<div class="detail-notes-lbl">Notes</div> 
+<div>${esc(d.notes)}</div> 
+</div>: ''} <div class="detail-actions"> <button class="btn btn-secondary" onclick="closePanel(); openForm('${id}')">Edit</button> <button class="btn btn-danger" onclick="confirmDelete('${id}')">Delete</button> </div>;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.getElementById('fab').style.display = 'none'; 
+document.getElementById('panel').classList.add('open'); 
 }
 
-// FORM
-function openForm(id) {
-  editingId = id;
-  const d = id ? drinks.find(x => x.id = id) : null;
+// FORM 
+function openForm(id) { 
+editingId = id; 
+const d = id ? drinks.find(x => x.id = id) : null;
 
-  document.getElementById('panel-title').textContent = id ? 'Edit Drink' : 'Add Drink';
-  document.getElementById('panel-action').textContent = 'Save';
-  document.getElementById('panel-action').onclick = saveForm;
+document.getElementById('panel-title').textContent = id ? 'Edit Drink' : 'Add Drink'; 
+document.getElementById('panel-action').textContent = 'Save'; 
+document.getElementById('panel-action').onclick = saveForm;
 
-  const status = d?.status || (activeTab = 'want' ? 'want' : 'tried');
-  const rating = d?.rating || 0;
+const status = d?.status || (activeTab = 'want' ? 'want' : 'tried'); 
+const rating = d?.rating || 0;
 
-  document.getElementById('panel-body').innerHTML = `
-    <div class="scan-cta" onclick="openScanner()">
-      <div class="scan-cta-icon">📷</div>
-      <div class="scan-cta-text">
-        <div class="scan-cta-title">Scan Barcode</div>
-        <div class="scan-cta-sub">Point at the can to auto-fill brand and flavor</div>
-      </div>
-    </div>
+document.getElementById('panel-body').innerHTML = ` 
+<div class="scan-cta" onclick="openScanner()"> 
+<div class="scan-cta-icon">📷</div> 
+<div class="scan-cta-text"> 
+<div class="scan-cta-title">Scan Barcode</div> 
+<div class="scan-cta-sub">Point at the can to auto-fill brand and flavor</div> 
+</div> 
+</div>
 
-    <div class="form-group">
-      <label class="form-label">Status</label>
-      <div class="seg-control">
-        <button class="seg-btn ${status = 'tried' ? 'active' : ''}" onclick="setStatus('tried', this)">Tried ✓</button>
-        <button class="seg-btn ${status = 'want' ? 'active' : ''}" onclick="setStatus('want', this)">Want to Try</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Brand</label>
-      <input class="form-input" id="f-brand" type="text" placeholder="Monster, Celsius, Reign..." value="${esc(d?.brand || '')}" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Flavor</label>
-      <input class="form-input" id="f-flavor" type="text" placeholder="Mango Loco, Peach Vibe..." value="${esc(d?.flavor || '')}" />
-    </div>
-    <div class="form-group" id="rating-group" style="${status = 'want' ? 'display:none' : ''}">
-      <label class="form-label">Your Rating</label>
-      <div class="star-picker" id="star-picker">
-        ${[1,2,3,4,5].map(i => `<span class="star ${i <= rating ? 'on' : ''}" onclick="setRating(${i})">★</span>`).join('')}
-      </div>
-      <input type="hidden" id="f-rating" value="${rating}" />
-    </div>
-    <div class="form-group" id="date-group" style="${status = 'want' ? 'display:none' : ''}">
-      <label class="form-label">Date Tried</label>
-      <input class="form-input" id="f-date" type="date" value="${d?.date || new Date().toISOString().slice(0,10)}" />
-    </div>
-    <div class="form-group" id="buy-group" style="${status = 'want' ? 'display:none' : ''}">
-      <div class="toggle-row">
-        <span class="toggle-label">Would Buy Again</span>
-        <label class="toggle">
-          <input type="checkbox" id="f-buy" ${d?.buyAgain ? 'checked' : ''} />
-          <div class="toggle-track"></div>
-          <div class="toggle-thumb"></div>
-        </label>
-      </div>
-    </div>
-    <div class="form-group" id="notes-group" style="${status = 'want' ? 'display:none' : ''}">
-      <label class="form-label">Notes</label>
-      <textarea class="form-input" id="f-notes" placeholder="Taste, texture, caffeine hit...">${esc(d?.notes || '')}</textarea>
-
+<div class="form-group">
+  <label class="form-label">Status</label>
+  <div class="seg-control">
+    <button class="seg-btn ${status === 'tried' ? 'active' : ''}" onclick="setStatus('tried', this)">Tried ✓</button>
+    <button class="seg-btn ${status === 'want' ? 'active' : ''}" onclick="setStatus('want', this)">Want to Try</button>
+  </div>
+</div>
+<div class="form-group">
+  <label class="form-label">Brand</label>
+  <input class="form-input" id="f-brand" type="text" placeholder="Monster, Celsius, Reign..." value="${esc(d?.brand || '')}" />
+</div>
+<div class="form-group">
+  <label class="form-label">Flavor</label>
+  <input class="form-input" id="f-flavor" type="text" placeholder="Mango Loco, Peach Vibe..." value="${esc(d?.flavor || '')}" />
+</div>
+<div class="form-group" id="rating-group" style="${status === 'want' ? 'display:none' : ''}">
+  <label class="form-label">Your Rating</label>
+  <div class="star-picker" id="star-picker">
+    ${[1,2,3,4,5].map(i => `<span class="star ${i <= rating ? 'on' : ''}" onclick="setRating(${i})">★</span>`).join('')}
+  </div>
+  <input type="hidden" id="f-rating" value="${rating}" />
+</div>
+<div class="form-group" id="date-group" style="${status === 'want' ? 'display:none' : ''}">
+  <label class="form-label">Date Tried</label>
+  <input class="form-input" id="f-date" type="date" value="${d?.date || new Date().toISOString().slice(0,10)}" />
+</div>
+<div class="form-group" id="buy-group" style="${status === 'want' ? 'display:none' : ''}">
+  <div class="toggle-row">
+    <span class="toggle-label">Would Buy Again</span>
+    <label class="toggle">
+      <input type="checkbox" id="f-buy" ${d?.buyAgain ? 'checked' : ''} />
+      <div class="toggle-track"></div>
+      <div class="toggle-thumb"></div>
+    </label>
+  </div>
+</div>
+<div class="form-group" id="notes-group" style="${status === 'want' ? 'display:none' : ''}">
+  <label class="form-label">Notes</label>
+  <textarea class="form-input" id="f-notes" placeholder="Taste, texture, caffeine hit...">${esc(d?.notes || '')}</textarea>
 </div>
 <div class="form-group">
   <label class="form-label">Photo (optional)</label>
@@ -952,7 +323,8 @@ photo: photo || null,
 };
 
 if (editingId) { 
-drinks = drinks.map(d => d.id = editingId ? entry : d); 
+const idx = drinks.findIndex(d => d.id = editingId); 
+if (idx ! -1) drinks[idx] = entry; 
 toast('Updated!'); 
 } else { 
 drinks.unshift(entry); 
@@ -997,7 +369,7 @@ document.getElementById('confirm').classList.remove('open');
 // STATS 
 function renderStats() { 
 const tried = drinks.filter(d => d.status = 'tried'); 
-const want  = drinks.filter(d => d.status = 'want'); 
+const want  = drinks.filter(d => d.status === 'want'); 
 const avg = tried.length 
 ? (tried.reduce((s, d) => s + (d.rating || 0), 0) / tried.length).toFixed(1) 
 : '—'; 
@@ -1006,7 +378,8 @@ const top = tried.length
 : null; 
 const buyAgain = tried.filter(d => d.buyAgain).length;
 
-document.getElementById('stats-grid').innerHTML = <div class="stats-card"><div class="val">${tried.length}</div><div class="lbl">Tried</div></div> <div class="stats-card"><div class="val">${want.length}</div><div class="lbl">Want to Try</div></div> <div class="stats-card"><div class="val">${avg}</div><div class="lbl">Avg Rating</div></div> <div class="stats-card"><div class="val">${buyAgain}</div><div class="lbl">Buy Again</div></div> ${top ?<div class="stats-card full"> 
+document.getElementById('stats-grid').innerHTML = <div class="stats-card"><div class="val">${tried.length}</div><div class="lbl">Tried</div></div> <div class="stats-card"><div class="val">${want.length}</div><div class="lbl">Want to Try</div></div> <div class="stats-card"><div class="val">${avg}</div><div class="lbl">Avg Rating</div></div> <div class="stats-card"><div class="val">${buyAgain}</div><div class="lbl">Buy Again</div></div> ${top ? 
+<div class="stats-card full"> 
 <div class="lbl" style="margin-bottom:4px;">Top Rated</div> 
 <div style="font-size:18px;font-weight:700;">${esc(top.brand)} — ${esc(top.flavor)}</div> 
 <div style="color:var(--accent);font-size:14px;margin-top:4px;">★ ${top.rating}/5</div> 
@@ -1056,9 +429,7 @@ let barcodeDetector = null;
 async function openScanner() { 
 const statusEl = document.getElementById('scanner-status');
 
-// Check for BarcodeDetector API (iOS 17+ / Chrome) 
 if (!('BarcodeDetector' in window)) { 
-// Fallback: take a photo and process it 
 document.getElementById('barcode-file-input').click(); 
 return; 
 }
@@ -1170,23 +541,15 @@ const data = await res.json();
 
 if (data.status === 1) {
   const p = data.product;
-
-  // Parse brand (can be comma-separated)
   const brand = (p.brands || '').split(',')[0].trim();
-
-  // Use English name first, fallback to generic name
   const flavor = (p.product_name_en || p.product_name || '').trim();
-
-  // Product image
   const photo = p.image_front_url || p.image_url || null;
 
-  // Fill in form fields
   const brandInput = document.getElementById('f-brand');
   const flavorInput = document.getElementById('f-flavor');
   if (brandInput) brandInput.value = brand;
   if (flavorInput) flavorInput.value = flavor;
 
-  // Fill in product photo if available
   if (photo) {
     const wrap = document.getElementById('photo-wrap');
     if (wrap) {
@@ -1207,7 +570,7 @@ toast('Lookup failed — check your connection');
 // UTILS 
 function esc(str) { 
 if (!str) return ''; 
-return String(str).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"'); 
+return String(str).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"'); 
 }
 
 function fmtDate(str) { 
@@ -1221,7 +584,9 @@ function toast(msg) {
 const t = document.getElementById('toast'); 
 t.textContent = msg; 
 t.classList.add('show'); 
-setTimeout(() => t.classList.remove('show'), 2500); 
+// Clear previous timeout if any 
+if (window.toastTimeout) clearTimeout(window.toastTimeout); 
+window.toastTimeout = setTimeout(() => t.classList.remove('show'), 2500); 
 }
 
 // INIT 
@@ -1230,7 +595,4 @@ renderTried();
 
 if ('serviceWorker' in navigator) { 
 navigator.serviceWorker.register('./sw.js').catch(() => {}); 
-} 
-</script>
-</body>
-</html>
+}
