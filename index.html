@@ -1,4 +1,5 @@
 Code
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,7 +49,6 @@ html, body {
   overflow: hidden;
 }
 
-/* Header */
 #header {
   padding: 16px 20px 12px;
   padding-top: calc(16px + env(safe-area-inset-top, 0px));
@@ -68,7 +68,6 @@ html, body {
   text-transform: uppercase;
 }
 
-/* Views */
 #view {
   flex: 1;
   overflow-y: auto;
@@ -85,7 +84,6 @@ html, body {
 
 .view-page.active { display: block; }
 
-/* Tab Bar */
 #tabs {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -117,7 +115,6 @@ html, body {
 .tab.active { color: var(--accent); }
 .tab svg { width: 22px; height: 22px; }
 
-/* Stats Strip */
 .stats-strip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -136,7 +133,6 @@ html, body {
 .stat-card .val { font-size: 24px; font-weight: 800; color: var(--accent); line-height: 1; }
 .stat-card .lbl { font-size: 11px; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
 
-/* Search & Sort */
 .search-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
 
 .search-input {
@@ -165,7 +161,6 @@ html, body {
   white-space: nowrap;
 }
 
-/* Drink Cards */
 .drink-list { display: flex; flex-direction: column; gap: 10px; }
 
 .drink-card {
@@ -194,23 +189,15 @@ html, body {
 .drink-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 
 .drink-info { flex: 1; min-width: 0; }
-
 .drink-brand { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .drink-flavor { font-size: 13px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
 .drink-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
 .drink-date { font-size: 11px; color: var(--text-muted); }
-
-.drink-rating-badge {
-  background: var(--accent-dim); color: var(--accent);
-  font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 20px;
-}
-
+.drink-rating-badge { background: var(--accent-dim); color: var(--accent); font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
 .buy-badge { font-size: 11px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
 .buy-yes { background: rgba(92,232,138,0.12); color: var(--green); }
 .buy-no  { background: rgba(232,92,92,0.12);  color: var(--red); }
 
-/* FAB */
 #fab {
   position: fixed;
   bottom: calc(64px + var(--safe-bottom) + 16px);
@@ -229,7 +216,6 @@ html, body {
 
 #fab:active { transform: scale(0.93); }
 
-/* Empty State */
 .empty-state {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; padding: 60px 20px; text-align: center; gap: 12px;
@@ -239,7 +225,6 @@ html, body {
 .empty-state .title { font-size: 18px; font-weight: 700; }
 .empty-state .sub { font-size: 14px; color: var(--text-dim); }
 
-/* Panel */
 #panel {
   position: fixed; inset: 0; z-index: 200;
   display: none; flex-direction: column; background: var(--bg);
@@ -272,7 +257,6 @@ html, body {
   padding: 20px; padding-bottom: calc(40px + var(--safe-bottom));
 }
 
-/* Form */
 .form-group { margin-bottom: 20px; }
 
 .form-label {
@@ -290,7 +274,6 @@ html, body {
 .form-input:focus { border-color: var(--accent); }
 textarea.form-input { resize: none; height: 90px; font-family: inherit; }
 
-/* Stars */
 .star-picker { display: flex; gap: 8px; }
 
 .star-picker .star {
@@ -302,7 +285,6 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
 .star-picker .star.on { color: var(--accent); }
 .star-picker .star:active { transform: scale(1.2); }
 
-/* Toggle */
 .toggle-row {
   display: flex; align-items: center; justify-content: space-between;
   background: var(--surface); border: 1px solid var(--border);
@@ -310,7 +292,6 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
 }
 
 .toggle-label { font-size: 15px; font-weight: 500; }
-
 .toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
 
 .toggle input {
@@ -333,7 +314,6 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
 
 .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
 
-/* Seg Control */
 .seg-control {
   display: flex; background: var(--surface);
   border: 1px solid var(--border); border-radius: 8px; padding: 3px; gap: 3px;
@@ -347,7 +327,6 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
 
 .seg-btn.active { background: var(--accent); color: #000; }
 
-/* Photo Upload */
 .photo-upload {
   width: 100%; height: 120px;
   background: var(--surface); border: 2px dashed var(--border);
@@ -361,11 +340,9 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
 .photo-upload-icon { font-size: 28px; }
 #photo-input { display: none; }
 
-/* Detail */
 .detail-photo { width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius); margin-bottom: 20px; }
 .detail-brand { font-size: 26px; font-weight: 800; line-height: 1.2; }
 .detail-flavor { font-size: 17px; color: var(--text-dim); margin-top: 2px; }
-
 .detail-stars { display: flex; gap: 4px; margin-top: 12px; }
 .detail-stars .star { font-size: 28px; }
 .detail-stars .star.on { color: var(--accent); }
@@ -382,10 +359,8 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
 
 .detail-notes { margin-top: 16px; background: var(--surface); border-radius: var(--radius); padding: 14px 16px; }
 .detail-notes-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
-
 .detail-actions { display: flex; gap: 10px; margin-top: 24px; }
 
-/* Buttons */
 .btn {
   flex: 1; padding: 14px; border-radius: var(--radius); border: none;
   font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
@@ -396,7 +371,6 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
 .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
 .btn-danger { background: rgba(232,92,92,0.15); color: var(--red); }
 
-/* Stats Page */
 .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
 
 .stats-card {
@@ -409,19 +383,114 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
 .stats-card.full { grid-column: span 2; }
 
 .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 12px; }
-
 .brand-bar-list { display: flex; flex-direction: column; gap: 10px; }
-
 .brand-bar-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
-
 .brand-bar-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-
 .brand-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
 
-/* Want card actions */
 .want-card-actions { display: flex; gap: 8px; margin-top: 12px; }
 
-/* Toast */
+/* ---- SCAN BUTTON ---- */
+.scan-cta {
+  display: flex; gap: 10px; align-items: center;
+  background: var(--accent-dim); border: 1px solid rgba(232,197,71,0.3);
+  border-radius: var(--radius); padding: 14px 16px;
+  margin-bottom: 20px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scan-cta:active { opacity: 0.8; }
+.scan-cta-icon { font-size: 28px; flex-shrink: 0; }
+.scan-cta-text .scan-cta-title { font-size: 15px; font-weight: 700; color: var(--accent); }
+.scan-cta-text .scan-cta-sub { font-size: 12px; color: var(--text-dim); margin-top: 1px; }
+
+/* ---- SCANNER MODAL ---- */
+#scanner-modal {
+  position: fixed; inset: 0; z-index: 600;
+  background: #000;
+  display: none; flex-direction: column;
+}
+
+#scanner-modal.open { display: flex; }
+
+#scanner-video {
+  width: 100%; flex: 1;
+  object-fit: cover;
+}
+
+#scanner-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  pointer-events: none;
+}
+
+.scanner-box {
+  position: relative;
+  width: 260px; height: 170px;
+}
+
+.scanner-frame {
+  width: 100%; height: 100%;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+}
+
+.scanner-line {
+  position: absolute;
+  left: 6px; right: 6px; height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  top: 15%;
+  animation: scanline 2s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--accent);
+}
+
+@keyframes scanline {
+  0%, 100% { top: 10%; }
+  50% { top: 82%; }
+}
+
+.scanner-hint {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 24px;
+  background: rgba(0,0,0,0.6);
+  padding: 8px 18px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+#scanner-cancel {
+  position: absolute;
+  bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+  left: 50%; transform: translateX(-50%);
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 14px 40px;
+  border-radius: 30px;
+  font-size: 16px; font-weight: 700;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+#scanner-status {
+  position: absolute;
+  top: calc(40px + env(safe-area-inset-top, 0px));
+  left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.65);
+  color: var(--accent);
+  font-size: 13px; font-weight: 700;
+  padding: 7px 16px; border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+
+/* ---- TOAST ---- */
 #toast {
   position: fixed;
   bottom: calc(72px + var(--safe-bottom) + 16px);
@@ -435,7 +504,7 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
 
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* Confirm */
+/* ---- CONFIRM ---- */
 #confirm {
   position: fixed; inset: 0; background: rgba(0,0,0,0.7);
   display: none; align-items: flex-end; justify-content: center;
@@ -503,7 +572,7 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
       </svg>
       Want to Try
     </button>
-    <button class="tab" id="tab-stats" onclick="switchTab('stats', this)">
+    <button class="tab" onclick="switchTab('stats', this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
       </svg>
@@ -528,6 +597,22 @@ textarea.form-input { resize: none; height: 90px; font-family: inherit; }
   </div>
   <div id="panel-body"></div>
 </div>
+
+<!-- Scanner Modal -->
+<div id="scanner-modal">
+  <video id="scanner-video" autoplay playsinline muted></video>
+  <div id="scanner-overlay">
+    <div id="scanner-status">SCANNING...</div>
+    <div class="scanner-box">
+      <div class="scanner-frame"></div>
+      <div class="scanner-line"></div>
+    </div>
+    <div class="scanner-hint">Point at the barcode on the can</div>
+  </div>
+  <button id="scanner-cancel" onclick="stopScanner()">Cancel</button>
+</div>
+
+<input type="file" id="barcode-file-input" accept="image/*" capture="environment" style="display:none" onchange="handleBarcodeFile(this)" />
 
 <div id="toast"></div>
 
@@ -582,7 +667,7 @@ function closePanel() {
   editingId = null;
 }
 
-// RENDER TRIED
+// SORT
 const sortLabels = { newest: 'Newest', rating: 'Top Rated', brand: 'Brand A-Z' };
 
 function cycleSort() {
@@ -603,6 +688,7 @@ function filterAndSort(list, query, sort) {
   return result;
 }
 
+// RENDER TRIED
 function renderTried() {
   const tried = drinks.filter(d => d.status = 'tried');
   const avg = tried.length
@@ -652,11 +738,9 @@ function drinkCard(d) {
   const thumb = d.photo
     ? `<div class="drink-thumb"><img src="${d.photo}" /></div>`
     : `<div class="drink-thumb">🥤</div>`;
-
   const buyBadge = d.buyAgain
     ? `<span class="buy-badge buy-yes">Buy Again</span>`
     : `<span class="buy-badge buy-no">Skip</span>`;
-
   return `
     <div class="drink-card" onclick="openDetail('${d.id}')">
       ${thumb}
@@ -677,7 +761,6 @@ function wantCard(d) {
   const thumb = d.photo
     ? `<div class="drink-thumb"><img src="${d.photo}" /></div>`
     : `<div class="drink-thumb">🥤</div>`;
-
   return `
     <div class="drink-card" style="flex-direction:column; align-items:stretch; cursor:default;">
       <div style="display:flex; align-items:center; gap:14px;">
@@ -755,6 +838,14 @@ function openForm(id) {
   const rating = d?.rating || 0;
 
   document.getElementById('panel-body').innerHTML = `
+    <div class="scan-cta" onclick="openScanner()">
+      <div class="scan-cta-icon">📷</div>
+      <div class="scan-cta-text">
+        <div class="scan-cta-title">Scan Barcode</div>
+        <div class="scan-cta-sub">Point at the can to auto-fill brand and flavor</div>
+      </div>
+    </div>
+
     <div class="form-group">
       <label class="form-label">Status</label>
       <div class="seg-control">
@@ -958,6 +1049,162 @@ document.getElementById('brand-bars').innerHTML = brands.length
 
 
 
+// ---- BARCODE SCANNER ---- 
+let scannerStream = null; 
+let scannerAnimFrame = null; 
+let barcodeDetector = null;
+
+async function openScanner() { 
+const statusEl = document.getElementById('scanner-status');
+
+// Check for BarcodeDetector API (iOS 17+ / Chrome) 
+if (!('BarcodeDetector' in window)) { 
+// Fallback: take a photo and process it 
+document.getElementById('barcode-file-input').click(); 
+return; 
+}
+
+try { 
+barcodeDetector = new BarcodeDetector({ 
+formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] 
+}); 
+} catch(e) { 
+document.getElementById('barcode-file-input').click(); 
+return; 
+}
+
+try { 
+scannerStream = await navigator.mediaDevices.getUserMedia({ 
+video: { 
+facingMode: { ideal: 'environment' }, 
+width: { ideal: 1280 }, 
+height: { ideal: 720 } 
+} 
+});
+
+const video = document.getElementById('scanner-video');
+video.srcObject = scannerStream;
+await video.play();
+
+document.getElementById('scanner-modal').classList.add('open');
+if (statusEl) statusEl.textContent = 'SCANNING...';
+scanFrame();
+} catch(e) { 
+toast('Camera access denied — check your browser settings'); 
+} 
+}
+
+async function scanFrame() { 
+const video = document.getElementById('scanner-video'); 
+if (!video || !barcodeDetector) return;
+
+if (video.readyState < 2) { 
+scannerAnimFrame = requestAnimationFrame(scanFrame); 
+return; 
+}
+
+try { 
+const barcodes = await barcodeDetector.detect(video); 
+if (barcodes.length > 0) { 
+const code = barcodes[0].rawValue; 
+stopScanner(); 
+await lookupBarcode(code); 
+return; 
+} 
+} catch(e) { /* keep scanning */ }
+
+scannerAnimFrame = requestAnimationFrame(scanFrame); 
+}
+
+function stopScanner() { 
+if (scannerAnimFrame) { 
+cancelAnimationFrame(scannerAnimFrame); 
+scannerAnimFrame = null; 
+} 
+if (scannerStream) { 
+scannerStream.getTracks().forEach(t => t.stop()); 
+scannerStream = null; 
+} 
+const video = document.getElementById('scanner-video'); 
+if (video) video.srcObject = null; 
+document.getElementById('scanner-modal').classList.remove('open'); 
+}
+
+async function handleBarcodeFile(input) { 
+const file = input.files[0]; 
+if (!file) return;
+
+if (!('BarcodeDetector' in window)) { 
+toast('Barcode scanning not supported — enter manually'); 
+input.value = ''; 
+return; 
+}
+
+toast('Reading barcode...'); 
+const img = new Image(); 
+const url = URL.createObjectURL(file); 
+img.onload = async () => { 
+try { 
+const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'] }); 
+const barcodes = await detector.detect(img); 
+URL.revokeObjectURL(url); 
+if (barcodes.length > 0) { 
+await lookupBarcode(barcodes[0].rawValue); 
+} else { 
+toast('No barcode found — try scanning again'); 
+} 
+} catch(e) { 
+URL.revokeObjectURL(url); 
+toast('Could not read barcode — enter manually'); 
+} 
+input.value = ''; 
+}; 
+img.src = url; 
+}
+
+async function lookupBarcode(code) { 
+toast('Looking up product...'); 
+try { 
+const res = await fetch(https://world.openfoodfacts.org/api/v0/product/${code}.json); 
+if (!res.ok) throw new Error('Network error'); 
+const data = await res.json();
+
+if (data.status === 1) {
+  const p = data.product;
+
+  // Parse brand (can be comma-separated)
+  const brand = (p.brands || '').split(',')[0].trim();
+
+  // Use English name first, fallback to generic name
+  const flavor = (p.product_name_en || p.product_name || '').trim();
+
+  // Product image
+  const photo = p.image_front_url || p.image_url || null;
+
+  // Fill in form fields
+  const brandInput = document.getElementById('f-brand');
+  const flavorInput = document.getElementById('f-flavor');
+  if (brandInput) brandInput.value = brand;
+  if (flavorInput) flavorInput.value = flavor;
+
+  // Fill in product photo if available
+  if (photo) {
+    const wrap = document.getElementById('photo-wrap');
+    if (wrap) {
+      wrap.innerHTML = `<img src="${esc(photo)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />`;
+      wrap._photo = photo;
+    }
+  }
+
+  toast(brand ? `Found: ${brand}` : 'Product found — check the details');
+} else {
+  toast('Product not in database — fill in manually');
+}
+} catch(e) { 
+toast('Lookup failed — check your connection'); 
+} 
+}
+
 // UTILS 
 function esc(str) { 
 if (!str) return ''; 
@@ -975,7 +1222,7 @@ function toast(msg) {
 const t = document.getElementById('toast'); 
 t.textContent = msg; 
 t.classList.add('show'); 
-setTimeout(() => t.classList.remove('show'), 2200); 
+setTimeout(() => t.classList.remove('show'), 2500); 
 }
 
 // INIT 
