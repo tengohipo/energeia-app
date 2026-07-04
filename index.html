@@ -1,627 +1,990 @@
+Code
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Energeia">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Energeia — Energy Drink Tracker</title>
-<style>
-  :root {
-    --bg: #0a0e0a;
-    --bg-card: #131a13;
-    --bg-card-hover: #1a231a;
-    --neon: #c6ff3a;
-    --neon-dim: #8fc22a;
-    --cyan: #3affe0;
-    --text: #eef5ec;
-    --text-dim: #8fa088;
-    --border: #22301f;
-    --danger: #ff5a5a;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0d0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Energeia" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <title>Energeia — Energy Drink Tracker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #0d0d0f;
+  --surface: #16161a;
+  --surface2: #1e1e24;
+  --border: #2a2a33;
+  --accent: #e8c547;
+  --accent-dim: rgba(232, 197, 71, 0.12);
+  --text: #f0f0f0;
+  --text-dim: #888;
+  --text-muted: #555;
+  --red: #e85c5c;
+  --green: #5ce88a;
+  --radius: 12px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
 
-  html, body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-    height: 100%;
-    overscroll-behavior: none;
-  }
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  overflow: hidden;
+}
 
-  body {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    background:
-      radial-gradient(circle at 15% 0%, rgba(198,255,58,0.08), transparent 40%),
-      radial-gradient(circle at 85% 15%, rgba(58,255,224,0.06), transparent 35%),
-      var(--bg);
-    min-height: 100vh;
-  }
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
 
-  #app { max-width: 560px; margin: 0 auto; padding: 20px 18px 100px; }
+/* Header */
+#header {
+  padding: 16px 20px 12px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
 
-  header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 22px;
-    padding-top: 8px;
-  }
-  .brand {
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: -0.3px;
-    font-style: italic;
-    white-space: nowrap;
-  }
-  .brand span { color: var(--neon); }
-  .stat-pill {
-    font-size: 12px;
-    color: var(--text-dim);
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 6px 12px;
-    border-radius: 100px;
-    font-weight: 600;
-  }
-  .stat-pill b { color: var(--neon); font-weight: 800; }
+#header h1 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
 
-  .tabs {
-    display: flex;
-    gap: 6px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 4px;
-    margin-bottom: 18px;
-  }
-  .tab {
-    flex: 1;
-    text-align: center;
-    padding: 10px 8px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-dim);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    border: none;
-    background: transparent;
-    font-family: inherit;
-  }
-  .tab.active {
-    background: var(--neon);
-    color: #0a0e0a;
-  }
+/* Views */
+#view {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
 
-  .search-row { display: flex; gap: 8px; margin-bottom: 16px; }
-  input[type="text"], input[type="search"] {
-    flex: 1;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 12px 14px;
-    border-radius: 12px;
-    font-size: 15px;
-    font-family: inherit;
-  }
-  input::placeholder { color: var(--text-dim); }
-  input:focus { outline: none; border-color: var(--neon-dim); }
+.view-page {
+  display: none;
+  padding: 16px 20px;
+  padding-bottom: calc(80px + var(--safe-bottom));
+  min-height: 100%;
+}
 
-  .add-btn {
-    background: var(--neon);
-    color: #0a0e0a;
-    border: none;
-    width: 46px;
-    height: 46px;
-    border-radius: 12px;
-    font-size: 24px;
-    font-weight: 700;
-    cursor: pointer;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-  .add-btn:active { transform: scale(0.94); }
+.view-page.active { display: block; }
 
-  .drink-list { display: flex; flex-direction: column; gap: 10px; }
+/* Tab Bar */
+#tabs {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding-bottom: var(--safe-bottom);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 100;
+}
 
-  .drink-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: background 0.15s ease, transform 0.1s ease;
-  }
-  .drink-card:active { transform: scale(0.985); background: var(--bg-card-hover); }
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s;
+}
 
-  .can-badge {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 16px;
-    color: #0a0e0a;
-    position: relative;
-  }
-  .can-badge.untried {
-    background: var(--bg);
-    border: 2px dashed var(--border);
-    color: var(--text-dim);
-  }
+.tab.active { color: var(--accent); }
+.tab svg { width: 22px; height: 22px; }
 
-  .drink-info { flex: 1; min-width: 0; }
-  .drink-name { font-weight: 700; font-size: 15px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .drink-brand { font-size: 12.5px; color: var(--text-dim); }
+/* Stats Strip */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
 
-  .drink-rating {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 3px;
-    flex-shrink: 0;
-  }
-  .rating-score {
-    font-size: 17px;
-    font-weight: 800;
-    color: var(--neon);
-  }
-  .rating-score.empty { color: var(--text-dim); font-size: 12px; font-weight: 600; }
-  .stars-mini { font-size: 10px; color: var(--neon-dim); letter-spacing: 1px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 10px;
+  text-align: center;
+}
 
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-dim);
-  }
-  .empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: 0.6; }
-  .empty-state p { font-size: 14px; line-height: 1.5; }
+.stat-card .val { font-size: 24px; font-weight: 800; color: var(--accent); line-height: 1; }
+.stat-card .lbl { font-size: 11px; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
 
-  .overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 100;
-    display: none;
-    align-items: flex-end;
-  }
-  .overlay.open { display: flex; }
+/* Search & Sort */
+.search-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
 
-  .sheet {
-    background: #0f150e;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    width: 100%;
-    max-width: 560px;
-    margin: 0 auto;
-    border-radius: 22px 22px 0 0;
-    padding: 20px 18px calc(24px + env(safe-area-inset-bottom));
-    max-height: 88vh;
-    overflow-y: auto;
-    animation: slideUp 0.25s ease;
-  }
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
+.search-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+}
 
-  .sheet-handle {
-    width: 36px;
-    height: 4px;
-    background: var(--border);
-    border-radius: 4px;
-    margin: 0 auto 16px;
-  }
+.search-input::placeholder { color: var(--text-muted); }
+.search-input:focus { border-color: var(--accent); }
 
-  .sheet-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
-  .sheet-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; }
+.sort-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
 
-  .field-label {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-    margin-top: 18px;
-    display: block;
-  }
-  .field-label:first-of-type { margin-top: 0; }
+/* Drink Cards */
+.drink-list { display: flex; flex-direction: column; gap: 10px; }
 
-  textarea {
-    width: 100%;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 12px 14px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-family: inherit;
-    resize: vertical;
-    min-height: 70px;
-  }
-  textarea:focus, input:focus { outline: none; border-color: var(--neon-dim); }
+.drink-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  .star-picker { display: flex; gap: 8px; justify-content: center; padding: 8px 0; }
-  .star-picker .star {
-    font-size: 36px;
-    cursor: pointer;
-    color: var(--border);
-    transition: transform 0.1s ease;
-  }
-  .star-picker .star.filled { color: var(--neon); }
-  .star-picker .star:active { transform: scale(1.2); }
+.drink-card:active { border-color: var(--accent); }
 
-  .tried-toggle {
-    display: flex;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 4px;
-  }
-  .tried-toggle button {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    background: transparent;
-    color: var(--text-dim);
-    font-weight: 700;
-    font-size: 13px;
-    border-radius: 9px;
-    font-family: inherit;
-    cursor: pointer;
-  }
-  .tried-toggle button.active { background: var(--neon); color: #0a0e0a; }
+.drink-thumb {
+  width: 48px; height: 48px;
+  border-radius: 8px;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0; overflow: hidden;
+}
 
-  .sheet-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 24px;
-  }
-  .btn {
-    flex: 1;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .btn-primary { background: var(--neon); color: #0a0e0a; }
-  .btn-primary:active { opacity: 0.85; }
-  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
-  .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+.drink-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 
-  .color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
-  .color-dot {
-    width: 32px; height: 32px; border-radius: 50%;
-    cursor: pointer; border: 2px solid transparent;
-  }
-  .color-dot.selected { border-color: var(--text); transform: scale(1.1); }
+.drink-info { flex: 1; min-width: 0; }
 
-  ::-webkit-scrollbar { display: none; }
-</style>
+.drink-brand { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.drink-flavor { font-size: 13px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.drink-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.drink-date { font-size: 11px; color: var(--text-muted); }
+
+.drink-rating-badge {
+  background: var(--accent-dim); color: var(--accent);
+  font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 20px;
+}
+
+.buy-badge { font-size: 11px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+.buy-yes { background: rgba(92,232,138,0.12); color: var(--green); }
+.buy-no  { background: rgba(232,92,92,0.12);  color: var(--red); }
+
+/* FAB */
+#fab {
+  position: fixed;
+  bottom: calc(64px + var(--safe-bottom) + 16px);
+  right: 20px;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000;
+  font-size: 28px;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(232,197,71,0.4);
+  z-index: 99;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+#fab:active { transform: scale(0.93); }
+
+/* Empty State */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 20px; text-align: center; gap: 12px;
+}
+
+.empty-state .icon { font-size: 48px; }
+.empty-state .title { font-size: 18px; font-weight: 700; }
+.empty-state .sub { font-size: 14px; color: var(--text-dim); }
+
+/* Panel */
+#panel {
+  position: fixed; inset: 0; z-index: 200;
+  display: none; flex-direction: column; background: var(--bg);
+}
+
+#panel.open { display: flex; }
+
+#panel-header {
+  padding: 16px 20px 12px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+
+#panel-back {
+  background: none; border: none; color: var(--accent);
+  font-size: 16px; cursor: pointer; padding: 4px;
+  display: flex; align-items: center; gap: 4px; font-weight: 600;
+}
+
+#panel-title { font-size: 17px; font-weight: 700; flex: 1; }
+
+#panel-action {
+  background: none; border: none; color: var(--accent);
+  font-size: 15px; font-weight: 700; cursor: pointer; padding: 4px;
+}
+
+#panel-body {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 20px; padding-bottom: calc(40px + var(--safe-bottom));
+}
+
+/* Form */
+.form-group { margin-bottom: 20px; }
+
+.form-label {
+  display: block; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px; color: var(--text);
+  font-size: 16px; outline: none; appearance: none;
+}
+
+.form-input:focus { border-color: var(--accent); }
+textarea.form-input { resize: none; height: 90px; font-family: inherit; }
+
+/* Stars */
+.star-picker { display: flex; gap: 8px; }
+
+.star-picker .star {
+  font-size: 32px; cursor: pointer; color: var(--border);
+  transition: color 0.1s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+
+.star-picker .star.on { color: var(--accent); }
+.star-picker .star:active { transform: scale(1.2); }
+
+/* Toggle */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px;
+}
+
+.toggle-label { font-size: 15px; font-weight: 500; }
+
+.toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+
+.toggle input {
+  position: absolute; opacity: 0; width: 100%; height: 100%;
+  cursor: pointer; z-index: 1; margin: 0;
+}
+
+.toggle-track {
+  position: absolute; inset: 0;
+  background: var(--border); border-radius: 13px; transition: background 0.2s;
+}
+
+.toggle input:checked + .toggle-track { background: var(--accent); }
+
+.toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; transition: transform 0.2s; pointer-events: none;
+}
+
+.toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+/* Seg Control */
+.seg-control {
+  display: flex; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px; padding: 3px; gap: 3px;
+}
+
+.seg-btn {
+  flex: 1; padding: 8px; border: none; border-radius: 6px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  background: none; color: var(--text-dim); transition: all 0.15s;
+}
+
+.seg-btn.active { background: var(--accent); color: #000; }
+
+/* Photo Upload */
+.photo-upload {
+  width: 100%; height: 120px;
+  background: var(--surface); border: 2px dashed var(--border);
+  border-radius: 8px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer; color: var(--text-dim); font-size: 13px;
+  overflow: hidden; position: relative;
+}
+
+.photo-upload img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.photo-upload-icon { font-size: 28px; }
+#photo-input { display: none; }
+
+/* Detail */
+.detail-photo { width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius); margin-bottom: 20px; }
+.detail-brand { font-size: 26px; font-weight: 800; line-height: 1.2; }
+.detail-flavor { font-size: 17px; color: var(--text-dim); margin-top: 2px; }
+
+.detail-stars { display: flex; gap: 4px; margin-top: 12px; }
+.detail-stars .star { font-size: 28px; }
+.detail-stars .star.on { color: var(--accent); }
+.detail-stars .star.off { color: var(--border); }
+
+.detail-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+
+.detail-row:last-of-type { border-bottom: none; }
+.detail-row-lbl { font-size: 13px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.detail-row-val { font-size: 15px; font-weight: 600; text-align: right; max-width: 60%; }
+
+.detail-notes { margin-top: 16px; background: var(--surface); border-radius: var(--radius); padding: 14px 16px; }
+.detail-notes-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
+
+.detail-actions { display: flex; gap: 10px; margin-top: 24px; }
+
+/* Buttons */
+.btn {
+  flex: 1; padding: 14px; border-radius: var(--radius); border: none;
+  font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+}
+
+.btn:active { opacity: 0.75; }
+.btn-primary { background: var(--accent); color: #000; }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn-danger { background: rgba(232,92,92,0.15); color: var(--red); }
+
+/* Stats Page */
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+
+.stats-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+}
+
+.stats-card .val { font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1; }
+.stats-card .lbl { font-size: 12px; color: var(--text-dim); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.stats-card.full { grid-column: span 2; }
+
+.section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 12px; }
+
+.brand-bar-list { display: flex; flex-direction: column; gap: 10px; }
+
+.brand-bar-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+
+.brand-bar-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+
+.brand-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
+
+/* Want card actions */
+.want-card-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: calc(72px + var(--safe-bottom) + 16px);
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--surface2); color: var(--text);
+  border: 1px solid var(--border); padding: 10px 18px;
+  border-radius: 20px; font-size: 14px; font-weight: 600;
+  opacity: 0; transition: opacity 0.2s, transform 0.2s;
+  z-index: 300; white-space: nowrap;
+}
+
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Confirm */
+#confirm {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: none; align-items: flex-end; justify-content: center;
+  z-index: 400; padding: 20px;
+  padding-bottom: calc(20px + var(--safe-bottom));
+}
+
+#confirm.open { display: flex; }
+
+.confirm-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; width: 100%; max-width: 400px; padding: 24px 20px 20px;
+}
+
+.confirm-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.confirm-sub { font-size: 14px; color: var(--text-dim); margin-bottom: 20px; }
+.confirm-btns { display: flex; gap: 10px; }
+  </style>
 </head>
 <body>
-
 <div id="app">
-  <header>
-    <div class="brand">ENERG<span>EIA</span></div>
-    <div class="stat-pill"><b id="triedCount">0</b> tried</div>
-  </header>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="all">All</button>
-    <button class="tab" data-tab="tried">Tried</button>
-    <button class="tab" data-tab="untried">Not Yet</button>
+  <div id="header">
+    <h1>Energeia</h1>
   </div>
 
+  <div id="view">
+
+<!-- Tried -->
+<div id="page-tried" class="view-page active">
+  <div class="stats-strip" id="tried-strip"></div>
   <div class="search-row">
-    <input type="search" id="searchInput" placeholder="Search brand or name...">
-    <button class="add-btn" id="openAddBtn">+</button>
+    <input class="search-input" id="search-tried" placeholder="Search brand or flavor..." oninput="renderTried()" />
+    <button class="sort-btn" id="sort-btn" onclick="cycleSort()">Newest</button>
   </div>
-
-  <div class="drink-list" id="drinkList"></div>
+  <div class="drink-list" id="tried-list"></div>
 </div>
 
-<div class="overlay" id="overlay">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="sheetTitle">Add a Drink</div>
-    <div class="sheet-sub" id="sheetSub">Log a new energy drink to your list</div>
+<!-- Want to Try -->
+<div id="page-want" class="view-page">
+  <div class="search-row">
+    <input class="search-input" id="search-want" placeholder="Search brand or flavor..." oninput="renderWant()" />
+  </div>
+  <div class="drink-list" id="want-list"></div>
+</div>
 
-    <label class="field-label">Brand</label>
-    <input type="text" id="inputBrand" placeholder="e.g. Monster, Red Bull, Celsius">
+<!-- Stats -->
+<div id="page-stats" class="view-page">
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="section-title">By Brand</div>
+  <div class="brand-bar-list" id="brand-bars"></div>
+</div>
+  </div>
 
-    <label class="field-label">Flavor / Name</label>
-    <input type="text" id="inputName" placeholder="e.g. Ultra Zero, Original">
+  <div id="tabs">
+    <button class="tab active" onclick="switchTab('tried', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+      </svg>
+      Tried
+    </button>
+    <button class="tab" onclick="switchTab('want', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      Want to Try
+    </button>
+    <button class="tab" id="tab-stats" onclick="switchTab('stats', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+      Stats
+    </button>
+  </div>
 
-    <label class="field-label">Can Color</label>
-    <div class="color-picker" id="colorPicker"></div>
+<button id="fab" onclick="openForm(null)">+</button>
+</div>
 
-    <label class="field-label">Status</label>
-    <div class="tried-toggle">
-      <button id="toggleUntried" class="active">Not Tried</button>
-      <button id="toggleTried">Tried</button>
-    </div>
+<!-- Panel -->
+<div id="panel">
+  <div id="panel-header">
+    <button id="panel-back" onclick="closePanel()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Back
+    </button>
+    <div id="panel-title">Add Drink</div>
+    <button id="panel-action" onclick="saveForm()">Save</button>
+  </div>
+  <div id="panel-body"></div>
+</div>
 
-    <div id="ratingSection" style="display:none;">
-      <label class="field-label">Your Rating</label>
-      <div class="star-picker" id="starPicker">
-        <span class="star" data-val="1">★</span>
-        <span class="star" data-val="2">★</span>
-        <span class="star" data-val="3">★</span>
-        <span class="star" data-val="4">★</span>
-        <span class="star" data-val="5">★</span>
-      </div>
+<div id="toast"></div>
 
-      <label class="field-label">Notes</label>
-      <textarea id="inputNotes" placeholder="Taste, aftertaste, would you buy again..."></textarea>
-    </div>
-
-    <div class="sheet-actions">
-      <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
-      <button class="btn btn-primary" id="saveBtn">Save</button>
-    </div>
-    <div class="sheet-actions" id="deleteRow" style="display:none;">
-      <button class="btn btn-danger" id="deleteBtn">Delete Drink</button>
+<div id="confirm">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title">Delete Drink?</div>
+    <div class="confirm-sub" id="confirm-sub">This cannot be undone.</div>
+    <div class="confirm-btns">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok">Delete</button>
     </div>
   </div>
 </div>
 
 <script>
-  const STORAGE_KEY = 'energeia_drinks_v1';
-  const CAN_COLORS = ['#c6ff3a', '#3affe0', '#ff5a5a', '#ff9f3a', '#a855f7', '#3a8fff', '#ff3ac2', '#8fa088'];
+// DATA
+const DB_KEY = 'energeia_drinks';
+let drinks = [];
+let currentSort = 'newest';
+let editingId = null;
+let activeTab = 'tried';
 
-  const DEFAULT_DRINKS = [
-    { brand: 'Monster', name: 'Original', color: '#c6ff3a', tried: false, rating: 0, notes: '' },
-    { brand: 'Monster', name: 'Ultra Zero', color: '#8fa088', tried: false, rating: 0, notes: '' },
-    { brand: 'Red Bull', name: 'Original', color: '#3a8fff', tried: false, rating: 0, notes: '' },
-    { brand: 'Red Bull', name: 'Sugar Free', color: '#a855f7', tried: false, rating: 0, notes: '' },
-    { brand: 'Celsius', name: 'Sparkling Orange', color: '#ff9f3a', tried: false, rating: 0, notes: '' },
-    { brand: 'Bang', name: 'Blue Razz', color: '#3affe0', tried: false, rating: 0, notes: '' },
-    { brand: 'Reign', name: 'Melon Mania', color: '#ff5a5a', tried: false, rating: 0, notes: '' },
-    { brand: 'Ghost', name: 'Warheads Sour Watermelon', color: '#ff3ac2', tried: false, rating: 0, notes: '' },
-  ];
+function loadData() {
+  try { drinks = JSON.parse(localStorage.getItem(DB_KEY)) || []; }
+  catch(e) { drinks = []; }
+}
 
-  function load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch(e) {}
-    const seeded = DEFAULT_DRINKS.map((d,i) => ({ ...d, id: 'seed_' + i }));
-    save(seeded);
-    return seeded;
+function saveData() {
+  localStorage.setItem(DB_KEY, JSON.stringify(drinks));
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// NAV
+function switchTab(tab, btn) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('view').scrollTop = 0;
+  if (tab = 'tried') renderTried();
+  if (tab = 'want') renderWant();
+  if (tab = 'stats') renderStats();
+}
+
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('fab').style.display = '';
+  editingId = null;
+}
+
+// RENDER TRIED
+const sortLabels = { newest: 'Newest', rating: 'Top Rated', brand: 'Brand A-Z' };
+
+function cycleSort() {
+  const order = ['newest', 'rating', 'brand'];
+  currentSort = order[(order.indexOf(currentSort) + 1) % order.length];
+  document.getElementById('sort-btn').textContent = sortLabels[currentSort];
+  renderTried();
+}
+
+function filterAndSort(list, query, sort) {
+  let result = list.filter(d =>
+    (d.brand || '').toLowerCase().includes(query.toLowerCase()) ||
+    (d.flavor || '').toLowerCase().includes(query.toLowerCase())
+  );
+  if (sort = 'newest') result.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  if (sort = 'rating') result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  if (sort = 'brand')  result.sort((a, b) => (a.brand || '').localeCompare(b.brand || ''));
+  return result;
+}
+
+function renderTried() {
+  const tried = drinks.filter(d => d.status = 'tried');
+  const avg = tried.length
+    ? (tried.reduce((s, d) => s + (d.rating || 0), 0) / tried.length).toFixed(1)
+    : '—';
+  const top = tried.length
+    ? tried.reduce((a, b) => (b.rating || 0) > (a.rating || 0) ? b : a, tried[0])
+    : null;
+
+  document.getElementById('tried-strip').innerHTML = `
+    <div class="stat-card"><div class="val">${tried.length}</div><div class="lbl">Tried</div></div>
+    <div class="stat-card"><div class="val">${avg}</div><div class="lbl">Avg Rating</div></div>
+    <div class="stat-card"><div class="val">${top ? top.rating : '—'}</div><div class="lbl">Best Score</div></div>
+  `;
+
+  const query = document.getElementById('search-tried').value;
+  const items = filterAndSort(tried, query, currentSort);
+  const list = document.getElementById('tried-list');
+
+  if (!items.length) {
+    list.innerHTML = tried.length = 0
+      ? `<div class="empty-state"><div class="icon">🥤</div><div class="title">Nothing logged yet</div><div class="sub">Tap + to add your first drink</div></div>`
+      : `<div class="empty-state"><div class="icon">🔍</div><div class="title">No results</div><div class="sub">Try a different search</div></div>`;
+    return;
   }
-  function save(drinks) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(drinks));
+  list.innerHTML = items.map(d => drinkCard(d)).join('');
+}
+
+// RENDER WANT
+function renderWant() {
+  const want = drinks.filter(d => d.status = 'want');
+  const query = document.getElementById('search-want').value;
+  const items = filterAndSort(want, query, 'newest');
+  const list = document.getElementById('want-list');
+
+  if (!items.length) {
+    list.innerHTML = want.length = 0
+      ? `<div class="empty-state"><div class="icon">📋</div><div class="title">Nothing on the list yet</div><div class="sub">Tap + to add drinks to try</div></div>`
+      : `<div class="empty-state"><div class="icon">🔍</div><div class="title">No results</div><div class="sub">Try a different search</div></div>`;
+    return;
   }
+  list.innerHTML = items.map(d => wantCard(d)).join('');
+}
 
-  let drinks = load();
-  let activeTab = 'all';
-  let searchQuery = '';
-  let editingId = null;
-  let selectedColor = CAN_COLORS[0];
-  let selectedRating = 0;
-  let isTriedState = false;
+// CARD HTML
+function drinkCard(d) {
+  const thumb = d.photo
+    ? `<div class="drink-thumb"><img src="${d.photo}" /></div>`
+    : `<div class="drink-thumb">🥤</div>`;
 
-  const drinkListEl = document.getElementById('drinkList');
-  const triedCountEl = document.getElementById('triedCount');
-  const overlay = document.getElementById('overlay');
-  const colorPicker = document.getElementById('colorPicker');
+  const buyBadge = d.buyAgain
+    ? `<span class="buy-badge buy-yes">Buy Again</span>`
+    : `<span class="buy-badge buy-no">Skip</span>`;
 
-  CAN_COLORS.forEach(c => {
-    const dot = document.createElement('div');
-    dot.className = 'color-dot';
-    dot.style.background = c;
-    dot.dataset.color = c;
-    dot.onclick = () => {
-      selectedColor = c;
-      renderColorPicker();
-    };
-    colorPicker.appendChild(dot);
-  });
-  function renderColorPicker() {
-    [...colorPicker.children].forEach(dot => {
-      dot.classList.toggle('selected', dot.dataset.color === selectedColor);
-    });
-  }
-
-  function render() {
-    let list = drinks.filter(d => {
-      if (activeTab === 'tried' && !d.tried) return false;
-      if (activeTab === 'untried' && d.tried) return false;
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        if (!d.brand.toLowerCase().includes(q) && !d.name.toLowerCase().includes(q)) return false;
-      }
-      return true;
-    });
-
-    triedCountEl.textContent = drinks.filter(d => d.tried).length;
-
-    if (list.length === 0) {
-      drinkListEl.innerHTML = `<div class="empty-state">
-        <div class="icon">⚡</div>
-        <p>${searchQuery ? 'No drinks match your search.' : 'No drinks here yet. Tap + to add one.'}</p>
-      </div>`;
-      return;
-    }
-
-    drinkListEl.innerHTML = list.map(d => {
-      const badgeContent = d.tried ? '' : '?';
-      const badgeStyle = d.tried ? `background:${d.color}` : '';
-      const badgeClass = d.tried ? 'can-badge' : 'can-badge untried';
-      let ratingHtml;
-      if (d.tried && d.rating > 0) {
-        ratingHtml = `<div class="rating-score">${d.rating}.0</div><div class="stars-mini">${'★'.repeat(d.rating)}${'☆'.repeat(5-d.rating)}</div>`;
-      } else if (d.tried) {
-        ratingHtml = `<div class="rating-score empty">Unrated</div>`;
-      } else {
-        ratingHtml = `<div class="rating-score empty">—</div>`;
-      }
-      return `<div class="drink-card" data-id="${d.id}">
-        <div class="${badgeClass}" style="${badgeStyle}">${badgeContent}</div>
-        <div class="drink-info">
-          <div class="drink-name">${escapeHtml(d.name)}</div>
-          <div class="drink-brand">${escapeHtml(d.brand)}</div>
+  return `
+    <div class="drink-card" onclick="openDetail('${d.id}')">
+      ${thumb}
+      <div class="drink-info">
+        <div class="drink-brand">${esc(d.brand)}</div>
+        <div class="drink-flavor">${esc(d.flavor) || 'No flavor listed'}</div>
+        <div class="drink-meta">
+          <span class="drink-rating-badge">★ ${d.rating || '—'}</span>
+          ${buyBadge}
+          <span class="drink-date">${fmtDate(d.date)}</span>
         </div>
-        <div class="drink-rating">${ratingHtml}</div>
-      </div>`;
-    }).join('');
+      </div>
+    </div>
+  `;
+}
 
-    [...drinkListEl.children].forEach(card => {
-      card.onclick = () => openEdit(card.dataset.id);
-    });
-  }
+function wantCard(d) {
+  const thumb = d.photo
+    ? `<div class="drink-thumb"><img src="${d.photo}" /></div>`
+    : `<div class="drink-thumb">🥤</div>`;
 
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
+  return `
+    <div class="drink-card" style="flex-direction:column; align-items:stretch; cursor:default;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        ${thumb}
+        <div class="drink-info">
+          <div class="drink-brand">${esc(d.brand)}</div>
+          <div class="drink-flavor">${esc(d.flavor) || 'No flavor listed'}</div>
+          <div class="drink-date" style="margin-top:4px;">${fmtDate(d.date)}</div>
+        </div>
+      </div>
+      <div class="want-card-actions">
+        <button class="btn btn-primary" style="font-size:13px;padding:10px;" onclick="markTried('${d.id}')">Mark as Tried</button>
+        <button class="btn btn-secondary" style="font-size:13px;padding:10px;" onclick="openForm('${d.id}')">Edit</button>
+        <button class="btn btn-danger" style="font-size:13px;padding:10px;flex:0;min-width:44px;" onclick="confirmDelete('${d.id}')">✕</button>
+      </div>
+    </div>
+  `;
+}
 
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.onclick = () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      activeTab = tab.dataset.tab;
-      render();
-    };
-  });
+// DETAIL
+function openDetail(id) {
+  const d = drinks.find(x => x.id = id);
+  if (!d) return;
 
-  document.getElementById('searchInput').oninput = (e) => {
-    searchQuery = e.target.value;
-    render();
-  };
+  document.getElementById('panel-title').textContent = d.brand;
+  document.getElementById('panel-action').textContent = 'Edit';
+  document.getElementById('panel-action').onclick = () => { closePanel(); openForm(id); };
 
-  function openAdd() {
-    editingId = null;
-    document.getElementById('sheetTitle').textContent = 'Add a Drink';
-    document.getElementById('sheetSub').textContent = 'Log a new energy drink to your list';
-    document.getElementById('inputBrand').value = '';
-    document.getElementById('inputName').value = '';
-    document.getElementById('inputNotes').value = '';
-    selectedColor = CAN_COLORS[Math.floor(Math.random()*CAN_COLORS.length)];
-    selectedRating = 0;
-    isTriedState = false;
-    document.getElementById('deleteRow').style.display = 'none';
-    renderColorPicker();
-    updateTriedToggle();
-    updateStars();
-    overlay.classList.add('open');
-  }
+  const stars = [1,2,3,4,5].map(i =>
+    `<span class="star ${i <= (d.rating||0) ? 'on' : 'off'}">★</span>`
+  ).join('');
 
-  function openEdit(id) {
-    const d = drinks.find(x => x.id === id);
-    if (!d) return;
-    editingId = id;
-    document.getElementById('sheetTitle').textContent = 'Edit Drink';
-    document.getElementById('sheetSub').textContent = d.brand + ' — ' + d.name;
-    document.getElementById('inputBrand').value = d.brand;
-    document.getElementById('inputName').value = d.name;
-    document.getElementById('inputNotes').value = d.notes || '';
-    selectedColor = d.color;
-    selectedRating = d.rating || 0;
-    isTriedState = d.tried;
-    document.getElementById('deleteRow').style.display = 'flex';
-    renderColorPicker();
-    updateTriedToggle();
-    updateStars();
-    overlay.classList.add('open');
-  }
+  const photo = d.photo ? `<img class="detail-photo" src="${d.photo}" />` : '';
 
-  function closeSheet() {
-    overlay.classList.remove('open');
-  }
+  document.getElementById('panel-body').innerHTML = `
+    ${photo}
+    <div style="margin-bottom:20px;">
+      <div class="detail-brand">${esc(d.brand)}</div>
+      <div class="detail-flavor">${esc(d.flavor) || ''}</div>
+      <div class="detail-stars">${stars}</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-row-lbl">Date Tried</div>
+      <div class="detail-row-val">${fmtDate(d.date)}</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-row-lbl">Would Buy Again</div>
+      <div class="detail-row-val">${d.buyAgain ? '✅ Yes' : '❌ No'}</div>
+    </div>
+    ${d.notes ? `
+    <div class="detail-notes">
+      <div class="detail-notes-lbl">Notes</div>
+      <div>${esc(d.notes)}</div>
+    </div>` : ''}
+    <div class="detail-actions">
+      <button class="btn btn-secondary" onclick="closePanel(); openForm('${id}')">Edit</button>
+      <button class="btn btn-danger" onclick="confirmDelete('${id}')">Delete</button>
+    </div>
+  `;
 
-  document.getElementById('openAddBtn').onclick = openAdd;
-  document.getElementById('cancelBtn').onclick = closeSheet;
-  overlay.onclick = (e) => { if (e.target === overlay) closeSheet(); };
+  document.getElementById('fab').style.display = 'none';
+  document.getElementById('panel').classList.add('open');
+}
 
-  function updateTriedToggle() {
-    document.getElementById('toggleTried').classList.toggle('active', isTriedState);
-    document.getElementById('toggleUntried').classList.toggle('active', !isTriedState);
-    document.getElementById('ratingSection').style.display = isTriedState ? 'block' : 'none';
-  }
-  document.getElementById('toggleTried').onclick = () => { isTriedState = true; updateTriedToggle(); };
-  document.getElementById('toggleUntried').onclick = () => { isTriedState = false; updateTriedToggle(); };
+// FORM
+function openForm(id) {
+  editingId = id;
+  const d = id ? drinks.find(x => x.id = id) : null;
 
-  function updateStars() {
-    document.querySelectorAll('#starPicker .star').forEach(star => {
-      star.classList.toggle('filled', parseInt(star.dataset.val) <= selectedRating);
-    });
-  }
-  document.querySelectorAll('#starPicker .star').forEach(star => {
-    star.onclick = () => {
-      selectedRating = parseInt(star.dataset.val);
-      updateStars();
-    };
-  });
+  document.getElementById('panel-title').textContent = id ? 'Edit Drink' : 'Add Drink';
+  document.getElementById('panel-action').textContent = 'Save';
+  document.getElementById('panel-action').onclick = saveForm;
 
-  document.getElementById('saveBtn').onclick = () => {
-    const brand = document.getElementById('inputBrand').value.trim();
-    const name = document.getElementById('inputName').value.trim();
-    const notes = document.getElementById('inputNotes').value.trim();
+  const status = d?.status || (activeTab = 'want' ? 'want' : 'tried');
+  const rating = d?.rating || 0;
 
-    if (!brand || !name) {
-      alert('Please enter both a brand and a flavor/name.');
-      return;
-    }
+  document.getElementById('panel-body').innerHTML = `
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <div class="seg-control">
+        <button class="seg-btn ${status = 'tried' ? 'active' : ''}" onclick="setStatus('tried', this)">Tried ✓</button>
+        <button class="seg-btn ${status = 'want' ? 'active' : ''}" onclick="setStatus('want', this)">Want to Try</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Brand</label>
+      <input class="form-input" id="f-brand" type="text" placeholder="Monster, Celsius, Reign..." value="${esc(d?.brand || '')}" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Flavor</label>
+      <input class="form-input" id="f-flavor" type="text" placeholder="Mango Loco, Peach Vibe..." value="${esc(d?.flavor || '')}" />
+    </div>
+    <div class="form-group" id="rating-group" style="${status = 'want' ? 'display:none' : ''}">
+      <label class="form-label">Your Rating</label>
+      <div class="star-picker" id="star-picker">
+        ${[1,2,3,4,5].map(i => `<span class="star ${i <= rating ? 'on' : ''}" onclick="setRating(${i})">★</span>`).join('')}
+      </div>
+      <input type="hidden" id="f-rating" value="${rating}" />
+    </div>
+    <div class="form-group" id="date-group" style="${status = 'want' ? 'display:none' : ''}">
+      <label class="form-label">Date Tried</label>
+      <input class="form-input" id="f-date" type="date" value="${d?.date || new Date().toISOString().slice(0,10)}" />
+    </div>
+    <div class="form-group" id="buy-group" style="${status = 'want' ? 'display:none' : ''}">
+      <div class="toggle-row">
+        <span class="toggle-label">Would Buy Again</span>
+        <label class="toggle">
+          <input type="checkbox" id="f-buy" ${d?.buyAgain ? 'checked' : ''} />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+    <div class="form-group" id="notes-group" style="${status = 'want' ? 'display:none' : ''}">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="f-notes" placeholder="Taste, texture, caffeine hit...">${esc(d?.notes || '')}</textarea>
 
-    if (editingId) {
-      const d = drinks.find(x => x.id === editingId);
-      d.brand = brand; d.name = name; d.notes = notes;
-      d.color = selectedColor; d.tried = isTriedState;
-      d.rating = isTriedState ? selectedRating : 0;
-    } else {
-      drinks.push({
-        id: 'd_' + Date.now(),
-        brand, name, notes,
-        color: selectedColor,
-        tried: isTriedState,
-        rating: isTriedState ? selectedRating : 0
-      });
-    }
-    save(drinks);
-    closeSheet();
-    render();
-  };
+</div>
+<div class="form-group">
+  <label class="form-label">Photo (optional)</label>
+  <div class="photo-upload" id="photo-wrap" onclick="document.getElementById('photo-input').click()">
+    ${d?.photo ? `<img src="${d.photo}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />` : `<div class="photo-upload-icon">📷</div><div>Tap to add a photo</div>`}
+  </div>
+  <input type="file" id="photo-input" accept="image/*" onchange="handlePhoto(this)" />
+</div>
+`;
 
-  document.getElementById('deleteBtn').onclick = () => {
-    if (!editingId) return;
-    if (confirm('Delete this drink from your list?')) {
-      drinks = drinks.filter(x => x.id !== editingId);
-      save(drinks);
-      closeSheet();
-      render();
-    }
-  };
+document.getElementById('fab').style.display = 'none'; 
+document.getElementById('panel').classList.add('open'); 
+document.getElementById('panel-body').scrollTop = 0; 
+}
 
-  render();
+function setStatus(val, btn) { 
+btn.closest('.seg-control').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active')); 
+btn.classList.add('active'); 
+const hide = val = 'want'; 
+['rating-group','date-group','buy-group','notes-group'].forEach(id => { 
+const el = document.getElementById(id); 
+if (el) el.style.display = hide ? 'none' : ''; 
+}); 
+}
 
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
-    });
-  }
+function setRating(val) { 
+document.getElementById('f-rating').value = val; 
+document.querySelectorAll('#star-picker .star').forEach((s, i) => { 
+s.classList.toggle('on', i < val); 
+}); 
+}
+
+function handlePhoto(input) { 
+const file = input.files[0]; 
+if (!file) return; 
+const reader = new FileReader(); 
+reader.onload = e => { 
+const wrap = document.getElementById('photo-wrap'); 
+wrap.innerHTML = <img src="${e.target.result}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />; 
+wrap._photo = e.target.result; 
+}; 
+reader.readAsDataURL(file); 
+}
+
+function saveForm() { 
+const brand = document.getElementById('f-brand')?.value?.trim(); 
+if (!brand) { toast('Please enter a brand name'); return; }
+
+const statusBtn = document.querySelector('#panel-body .seg-btn.active'); 
+const status = statusBtn?.textContent.includes('Want') ? 'want' : 'tried';
+
+const photoWrap = document.getElementById('photo-wrap'); 
+const photo = photoWrap?._photo || (editingId ? drinks.find(d => d.id = editingId)?.photo : null);
+
+const entry = { 
+id: editingId || uid(), 
+brand, 
+flavor: document.getElementById('f-flavor')?.value?.trim() || '', 
+status, 
+date: document.getElementById('f-date')?.value || new Date().toISOString().slice(0,10), 
+rating: status = 'tried' ? parseInt(document.getElementById('f-rating')?.value || '0') : 0, 
+buyAgain: status = 'tried' ? (document.getElementById('f-buy')?.checked || false) : false, 
+notes: status = 'tried' ? (document.getElementById('f-notes')?.value?.trim() || '') : '', 
+photo: photo || null, 
+};
+
+if (editingId) { 
+drinks = drinks.map(d => d.id = editingId ? entry : d); 
+toast('Updated!'); 
+} else { 
+drinks.unshift(entry); 
+toast('Drink logged!'); 
+}
+
+saveData(); 
+closePanel(); 
+if (status = 'tried') renderTried(); 
+else renderWant(); 
+}
+
+// ACTIONS 
+function markTried(id) { 
+const d = drinks.find(x => x.id = id); 
+if (!d) return; 
+d.status = 'tried'; 
+d.date = new Date().toISOString().slice(0,10); 
+saveData(); 
+renderWant(); 
+toast("Moved to Tried — don't forget to rate it!"); 
+}
+
+function confirmDelete(id) { 
+document.getElementById('confirm-ok').onclick = () => { doDelete(id); closeConfirm(); }; 
+document.getElementById('confirm').classList.add('open'); 
+}
+
+function doDelete(id) { 
+drinks = drinks.filter(d => d.id ! id); 
+saveData(); 
+closePanel(); 
+renderTried(); 
+renderWant(); 
+toast('Deleted'); 
+}
+
+function closeConfirm() { 
+document.getElementById('confirm').classList.remove('open'); 
+}
+
+// STATS 
+function renderStats() { 
+const tried = drinks.filter(d => d.status = 'tried'); 
+const want  = drinks.filter(d => d.status = 'want'); 
+const avg = tried.length 
+? (tried.reduce((s, d) => s + (d.rating || 0), 0) / tried.length).toFixed(1) 
+: '—'; 
+const top = tried.length 
+? tried.reduce((a, b) => (b.rating||0) > (a.rating||0) ? b : a, tried[0]) 
+: null; 
+const buyAgain = tried.filter(d => d.buyAgain).length;
+
+document.getElementById('stats-grid').innerHTML = <div class="stats-card"><div class="val">${tried.length}</div><div class="lbl">Tried</div></div> <div class="stats-card"><div class="val">${want.length}</div><div class="lbl">Want to Try</div></div> <div class="stats-card"><div class="val">${avg}</div><div class="lbl">Avg Rating</div></div> <div class="stats-card"><div class="val">${buyAgain}</div><div class="lbl">Buy Again</div></div> ${top ?<div class="stats-card full"> 
+<div class="lbl" style="margin-bottom:4px;">Top Rated</div> 
+<div style="font-size:18px;font-weight:700;">${esc(top.brand)} — ${esc(top.flavor)}</div> 
+<div style="color:var(--accent);font-size:14px;margin-top:4px;">★ ${top.rating}/5</div> 
+</div>: ''};
+
+
+
+
+
+
+
+const brandMap = {}; 
+tried.forEach(d => { 
+const b = d.brand || 'Unknown'; 
+if (!brandMap[b]) brandMap[b] = { count: 0, total: 0 }; 
+brandMap[b].count++; 
+brandMap[b].total += d.rating || 0; 
+});
+
+const brands = Object.entries(brandMap) 
+.map(([name, v]) => ({ name, count: v.count, avg: v.count ? (v.total/v.count).toFixed(1) : 0 })) 
+.sort((a, b) => b.count - a.count) 
+.slice(0, 8);
+
+const maxCount = brands[0]?.count || 1;
+
+document.getElementById('brand-bars').innerHTML = brands.length 
+? brands.map(b => <div> <div class="brand-bar-label"> <span>${esc(b.name)}</span> <span style="color:var(--text-dim)">${b.count} tried · ★ ${b.avg}</span> </div> <div class="brand-bar-track"> <div class="brand-bar-fill" style="width:${Math.round((b.count/maxCount)*100)}%"></div> </div> </div>).join('') 
+: <div style="color:var(--text-muted);font-size:14px;">Log some drinks first</div>; 
+}
+
+
+
+
+
+
+
+
+
+
+
+// UTILS 
+function esc(str) { 
+if (!str) return ''; 
+return String(str).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"'); 
+}
+
+function fmtDate(str) { 
+if (!str) return ''; 
+try { 
+return new Date(str + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); 
+} catch { return str; } 
+}
+
+function toast(msg) { 
+const t = document.getElementById('toast'); 
+t.textContent = msg; 
+t.classList.add('show'); 
+setTimeout(() => t.classList.remove('show'), 2200); 
+}
+
+// INIT 
+loadData(); 
+renderTried();
+
+if ('serviceWorker' in navigator) { 
+navigator.serviceWorker.register('./sw.js').catch(() => {}); 
+} 
 </script>
-
 </body>
 </html>
